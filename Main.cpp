@@ -133,6 +133,18 @@ int WINAPI WinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
   if (ERROR_SUCCESS != RegSetValueExW(env_key, L"PATH", 0, REG_EXPAND_SZ, (BYTE*) out_buf, out_size_bytes))
     goto error;
 
+  if (0 == SendMessageTimeoutW(HWND_BROADCAST, WM_SETTINGCHANGE, 0, (LPARAM) L"Environment", SMTO_BLOCK, 100, NULL))
+  {
+    if (ERROR_TIMEOUT == GetLastError())
+    {
+      MessageBox(NULL, L"Timed out trying to update environment variables.\r\nYou will need a reboot.", L"Warning", MB_OK|MB_ICONWARNING);
+    }
+    else
+    {
+      MessageBox(NULL, L"Something went wrong trying to notify Windows about the environment change.\r\nYou will need a reboot.", L"Warning", MB_OK|MB_ICONWARNING);
+    }
+  }
+
   return 0;
 
 cmdline_error:
